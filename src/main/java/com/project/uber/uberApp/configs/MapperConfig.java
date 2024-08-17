@@ -26,7 +26,7 @@ public class MapperConfig {
                     point.getX(),
                     point.getY()
             };
-            return new PointDto();
+            return new PointDto(coordinates);
         });
 
         return mapper;

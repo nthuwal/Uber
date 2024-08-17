@@ -15,11 +15,15 @@ public class Payment {
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
+
     @OneToOne(fetch = FetchType.LAZY)
     private Ride ride;
-    private  Double amount;
+
+    private Double amount;
+
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
+
     @CreationTimestamp
     private LocalDateTime paymentTime;
 }
