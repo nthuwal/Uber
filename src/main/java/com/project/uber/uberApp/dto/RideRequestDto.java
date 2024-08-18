@@ -14,11 +14,15 @@ import java.time.LocalDateTime;
 public class RideRequestDto {
 
     private Long id;
+
     private PointDto pickUpLocation;
     private PointDto dropOffLocation;
-    private LocalDateTime requestedTime;
-    private RiderDto rider;
     private PaymentMethod paymentMethod;
-    private RideRequestStatus rideRequestStatus;
+
+    private LocalDateTime requestedTime;
+
+    private RiderDto rider;
     private Double fare;
+
+    private RideRequestStatus rideRequestStatus;
 }

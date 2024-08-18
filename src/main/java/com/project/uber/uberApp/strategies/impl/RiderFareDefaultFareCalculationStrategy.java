@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 public class RiderFareDefaultFareCalculationStrategy implements RideFareCalculationStrategy {
 
     private final DistanceService distanceService;
+
     @Override
     public double calculateFare(RideRequest rideRequest) {
         double distance = distanceService.calculateDistance(rideRequest.getPickUpLocation(),
