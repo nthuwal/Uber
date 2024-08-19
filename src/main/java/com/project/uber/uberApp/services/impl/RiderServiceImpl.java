@@ -8,9 +8,11 @@ import com.project.uber.uberApp.entities.*;
 import com.project.uber.uberApp.entities.enums.RideRequestStatus;
 import com.project.uber.uberApp.entities.enums.RideStatus;
 import com.project.uber.uberApp.exceptions.ResourceNotFoundException;
+import com.project.uber.uberApp.repositories.RideRepository;
 import com.project.uber.uberApp.repositories.RideRequestRepository;
 import com.project.uber.uberApp.repositories.RiderRepository;
 import com.project.uber.uberApp.services.DriverService;
+import com.project.uber.uberApp.services.RatingService;
 import com.project.uber.uberApp.services.RideService;
 import com.project.uber.uberApp.services.RiderService;
 import com.project.uber.uberApp.strategies.RideStrategyManager;
@@ -28,6 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class RiderServiceImpl implements RiderService {
+    private final RideRepository rideRepository;
 
     private final ModelMapper modelMapper;
     private final RideStrategyManager rideStrategyManager;
@@ -35,6 +38,7 @@ public class RiderServiceImpl implements RiderService {
     private final RiderRepository riderRepository;
     private final RideService rideService;
     private final DriverService driverService;
+    private final RatingService ratingService;
 
     @Override
     @Transactional
@@ -78,7 +82,20 @@ public class RiderServiceImpl implements RiderService {
 
     @Override
     public DriverDto rateDriver(Long rideId, Integer rating) {
-        return null;
+
+        Ride ride = rideService.getRideById(rideId);
+        Rider rider = getCurrentRider();
+
+        if(!ride.getRider().equals(rider)) {
+            throw new RuntimeException("Rider is not the Owner of this Ride");
+        }
+
+        if(!ride.getRideStatus().equals(RideStatus.ENDED)) {
+            throw new RuntimeException("Ride Status is not Ended hence cannot start rating, status: "+ride.getRideStatus());
+        }
+
+        return ratingService.rateDriver(ride,rating);
+
     }
 
     @Override
