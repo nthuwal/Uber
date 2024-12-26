@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.support.HttpRequestHandlerServlet;
 
 import java.util.Arrays;
 
@@ -22,16 +23,15 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    ResponseEntity<UserDto> signUp(@RequestBody SignUpDto signupDto) {
-
-        return new ResponseEntity<>(authService.signUp(signupDto), HttpStatus.CREATED);
+    ResponseEntity<UserDto> signUp(@RequestBody SignupDto signupDto) {
+        return new ResponseEntity<>(authService.signup(signupDto), HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @PostMapping("/onBoardNewDriver/{userId}")
-    ResponseEntity<DriverDto> onBoardNewDriver(@PathVariable Long userId,
-                                                      @RequestBody OnboardDriverDto onboardDriverDto) {
-        return new ResponseEntity<>(authService.onboardNewDriver(userId, onboardDriverDto.getVehicleId()), HttpStatus.CREATED);
+    ResponseEntity<DriverDto> onBoardNewDriver(@PathVariable Long userId, @RequestBody OnboardDriverDto onboardDriverDto) {
+        return new ResponseEntity<>(authService.onboardNewDriver(userId,
+                onboardDriverDto.getVehicleId()), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
@@ -59,5 +59,6 @@ public class AuthController {
 
         return ResponseEntity.ok(new LoginResponseDto(accessToken));
     }
+
 
 }

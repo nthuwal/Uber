@@ -1,10 +1,10 @@
 package com.project.uber.uberApp.services.impl;
 
 import com.project.uber.uberApp.dto.DriverDto;
-import com.project.uber.uberApp.dto.SignUpDto;
+import com.project.uber.uberApp.dto.SignupDto;
 import com.project.uber.uberApp.dto.UserDto;
-import com.project.uber.uberApp.entities.User;
 import com.project.uber.uberApp.entities.Driver;
+import com.project.uber.uberApp.entities.User;
 import com.project.uber.uberApp.entities.enums.Role;
 import com.project.uber.uberApp.exceptions.ResourceNotFoundException;
 import com.project.uber.uberApp.exceptions.RuntimeConflictException;
@@ -25,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
+import static com.project.uber.uberApp.entities.enums.Role.DRIVER;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -40,26 +42,26 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String[] login(String email, String password) {
-        String tokens[] = new String[2];
-        Authentication authentication= authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email,password)
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, password)
         );
 
         User user = (User) authentication.getPrincipal();
-        String acessToken = jwtService.generateAccessToken(user);
+
+        String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
-        return new String[]{acessToken, refreshToken};
+        return new String[]{accessToken, refreshToken};
     }
 
     @Override
     @Transactional
-    public UserDto signUp(SignUpDto signUpDto) {
-        User user = userRepository.findByEmail(signUpDto.getEmail()).orElse(null);
+    public UserDto signup(SignupDto signupDto) {
+        User user = userRepository.findByEmail(signupDto.getEmail()).orElse(null);
         if(user != null)
-                throw new RuntimeConflictException("Cannot signup, User already exists with email "+signUpDto.getEmail());
+            throw new RuntimeConflictException("Cannot signup, User already exists with email "+signupDto.getEmail());
 
-        User mappedUser = modelMapper.map(signUpDto, User.class);
+        User mappedUser = modelMapper.map(signupDto, User.class);
         mappedUser.setRoles(Set.of(Role.RIDER));
         mappedUser.setPassword(passwordEncoder.encode(mappedUser.getPassword()));
         User savedUser = userRepository.save(mappedUser);
@@ -73,12 +75,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public DriverDto onboardNewDriver(Long userId, String vehicleId) {
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id "+userId));
 
-        if(user.getRoles().contains(Role.DRIVER))
-            throw new RuntimeException("User with id " + userId + " is already a Driver");
+        if(user.getRoles().contains(DRIVER))
+            throw new RuntimeConflictException("User with id "+userId+" is already a Driver");
 
         Driver createDriver = Driver.builder()
                 .user(user)
@@ -86,11 +87,10 @@ public class AuthServiceImpl implements AuthService {
                 .vehicleId(vehicleId)
                 .available(true)
                 .build();
-        user.getRoles().add(Role.DRIVER);
+        user.getRoles().add(DRIVER);
         userRepository.save(user);
         Driver savedDriver = driverService.createNewDriver(createDriver);
-        return modelMapper.map(savedDriver,DriverDto.class);
-
+        return modelMapper.map(savedDriver, DriverDto.class);
     }
 
     @Override
@@ -102,3 +102,14 @@ public class AuthServiceImpl implements AuthService {
         return jwtService.generateAccessToken(user);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
